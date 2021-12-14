@@ -10,8 +10,8 @@ public class SphereController : MonoBehaviour
     public float yMoveForce = 10;
     public float xMoveForce = 10;
 
-    int moveX = 0;
-    int moveY = 0;
+    float moveX = 0;
+    float moveY = 0;
 
     public float MoveEventInterval = 0.1f;
     private float _moveEventCounter;
@@ -67,7 +67,7 @@ public class SphereController : MonoBehaviour
         rigidBody2D.AddForce(new Vector2(xRandomForce * penguatanGaya, yRandomForce * penguatanGaya));
     }
 
-    public void Move(int _x, int _y) {
+    public void Move(float _x, float _y) {
         moveX = _x;
         moveY = _y;
     }
