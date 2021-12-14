@@ -35,8 +35,8 @@ public class GameManager : MonoBehaviour {
     public float paddingHorizontal = 0.9f;
     public float paddingVertical = 0.85f;
 
-    public float randomizeDelayMin = 30;
-    public float randomizeDelayMax = 60;
+    public float respawnDelay = 5f;
+    private float respawnDelayCounter = 0;
 
     public GameObject bugPrefab;
     public GameObject chipPrefab;
@@ -55,12 +55,10 @@ public class GameManager : MonoBehaviour {
         int randomChip = Mathf.RoundToInt(Random.Range(minChip, maxChip));
 
         for (int loop = 0; loop < randomBug; loop++) {
-            //Invoke("SpawnBug", loop*1f);
             SpawnBug();
         }
 
         for (int loop = 0; loop < randomChip; loop++) {
-            //Invoke("SpawnChip", loop * 1f);
             SpawnChip();
         }
 
@@ -92,12 +90,32 @@ public class GameManager : MonoBehaviour {
             _y = moveTo.normalized.y;
         }
         SphereController.Instance.Move(_x, _y);
+
+        float deltaTime = Time.unscaledDeltaTime;
+        respawnDelayCounter -= deltaTime;
+
+        if (respawnDelayCounter < 0f) {
+            respawnDelayCounter = respawnDelay;
+
+            if (bugPool.TotalActive() < minBug) {
+                int randomBug = Mathf.RoundToInt(Random.Range(0, maxBug - bugPool.TotalActive()));
+                for (int loop = 0; loop < randomBug; loop++) {
+                    SpawnBug();
+                }
+            }
+
+            if (chipPool.TotalActive() < minChip) {
+                int randomChip = Mathf.RoundToInt(Random.Range(0, maxChip - chipPool.TotalActive()));
+                for (int loop = 0; loop < randomChip; loop++) {
+                    SpawnChip();
+                }
+            }
+        }
     }
 
     void SpawnBug() {
         float randomSize;
         GameEntity newBug = bugPool.GetOrCreate();
-        newBug.name += Random.Range(0, 10000).ToString();
         newBug.transform.position = GetSpawnPosition();
         randomSize = Random.Range(minBugScale, maxBugScale);
         newBug.transform.localScale = new Vector2(randomSize, randomSize);
@@ -108,7 +126,6 @@ public class GameManager : MonoBehaviour {
     void SpawnChip() {
         float randomSize;
         GameEntity newChip = chipPool.GetOrCreate();
-        newChip.name += Random.Range(0, 10000).ToString();
         newChip.transform.position = GetSpawnPosition();
         randomSize = Random.Range(minChipScale, maxChipScale);
         newChip.transform.localScale = new Vector2(randomSize, randomSize);

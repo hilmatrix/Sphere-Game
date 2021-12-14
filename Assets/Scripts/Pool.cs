@@ -29,4 +29,8 @@ public class Pool<T> {
         }
         return obj;
     }
+
+    public int TotalActive() {
+        return gameObjectPool.FindAll(m => m.activeSelf).Count;
+    }
 }
