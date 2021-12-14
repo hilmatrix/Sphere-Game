@@ -4,8 +4,13 @@ using UnityEngine;
 
 public class GameEntity : MonoBehaviour
 {
+    public enum Type {
+        Bug, Chip
+    };
+
     public bool initialized = false;
     public bool triggerSomething = false;
+    public Type type;
     private float delay = 1f;
 
     // Start is called before the first frame update
@@ -22,6 +27,11 @@ public class GameEntity : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other) {
         triggerSomething = true;
+
+        if (initialized && other.tag == "Player") {
+            GameManager.Instance.Hit(type);
+            Deactivate();
+        }
     }
 
     void OnTriggerStay2D(Collider2D other) {
@@ -29,22 +39,28 @@ public class GameEntity : MonoBehaviour
     }
 
     public void Initialize() {
-        GetComponent<SpriteRenderer>().enabled = true;
-        GetComponent<SpriteRenderer>().color = new Color(1f,1f,1f,0f);
+        GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0f);
         initialized = false;
         triggerSomething = false;
+        gameObject.SetActive(true);
         Invoke("Check", delay);
     }
 
     public void Check() {
         if (triggerSomething) {
-            //Debug.Log(gameObject.name + " Hitting something");
+            triggerSomething = false;
             transform.position = GameManager.Instance.GetSpawnPosition();
-            Invoke("Initialize", delay);
+            Invoke("Check", delay);
         } else {
-            GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
             initialized = true;
-            //Debug.Log(gameObject.name + "Finish");
+            GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
         }
+    }
+
+    public void Deactivate() {
+        initialized = false;
+        triggerSomething = false;
+        GetComponent<SpriteRenderer>().color = new Color(1f,1f,1f,0);
+        gameObject.SetActive(false);
     }
 }

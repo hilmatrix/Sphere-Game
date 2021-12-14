@@ -25,6 +25,9 @@ public class GameManager : MonoBehaviour {
     public float minChipScale = 0.3f;
     public float maxChipScale = 0.6f;
 
+    public int hitBugScore = 2;
+    public int hitChipScore = -1;
+
     public Transform borderLeft;
     public Transform borderRight;
     public Transform borderUp;
@@ -41,7 +44,7 @@ public class GameManager : MonoBehaviour {
     private Pool<GameEntity> bugPool;
     private Pool<GameEntity> chipPool;
 
-    
+    private int score = 0;
 
     // Start is called before the first frame update
     void Start() {
@@ -60,6 +63,8 @@ public class GameManager : MonoBehaviour {
             //Invoke("SpawnChip", loop * 1f);
             SpawnChip();
         }
+
+        ScoreManager.Instance.text = score.ToString(); 
     }
 
     // Update is called once per frame
@@ -92,6 +97,7 @@ public class GameManager : MonoBehaviour {
     void SpawnBug() {
         float randomSize;
         GameEntity newBug = bugPool.GetOrCreate();
+        newBug.name += Random.Range(0, 10000).ToString();
         newBug.transform.position = GetSpawnPosition();
         randomSize = Random.Range(minBugScale, maxBugScale);
         newBug.transform.localScale = new Vector2(randomSize, randomSize);
@@ -102,6 +108,7 @@ public class GameManager : MonoBehaviour {
     void SpawnChip() {
         float randomSize;
         GameEntity newChip = chipPool.GetOrCreate();
+        newChip.name += Random.Range(0, 10000).ToString();
         newChip.transform.position = GetSpawnPosition();
         randomSize = Random.Range(minChipScale, maxChipScale);
         newChip.transform.localScale = new Vector2(randomSize, randomSize);
@@ -115,4 +122,12 @@ public class GameManager : MonoBehaviour {
             borderDown.position.y * paddingVertical);
         return new Vector2(_x, _y);
     }
+
+    public void Hit(GameEntity.Type _type) {
+        switch (_type) {
+            case GameEntity.Type.Bug: score += hitBugScore; break;
+            case GameEntity.Type.Chip: score += hitChipScore; break;
+        }
+        ScoreManager.Instance.text = score.ToString();
+    } 
 }

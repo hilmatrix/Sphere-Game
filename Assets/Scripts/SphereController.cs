@@ -79,7 +79,7 @@ public class SphereController : MonoBehaviour
 
     void RestartGame() {
         ResetBall();
-        Invoke("PushSphere", 2);
+        //Invoke("PushSphere", 2);
     }
 
 }
