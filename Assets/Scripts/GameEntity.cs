@@ -11,7 +11,9 @@ public class GameEntity : MonoBehaviour
     public bool initialized = false;
     public bool triggerSomething = false;
     public Type type;
-    private float delay = 1f;
+    private float delay = 0.2f;
+
+    private float relocateTime;
 
     // Start is called before the first frame update
     void Start()
@@ -20,17 +22,24 @@ public class GameEntity : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
-    {
-        
+    void Update() {
+        float deltaTime = Time.unscaledDeltaTime;
+        if (initialized && (type == Type.Chip) && (!GameManager.Instance.gameOver)) {
+            if (relocateTime > 0)
+                relocateTime -= deltaTime;
+            else {
+                Relocate();
+            }
+        }
     }
 
     void OnTriggerEnter2D(Collider2D other) {
         triggerSomething = true;
 
-        if (initialized && other.tag == "Player") {
+        if (initialized && other.tag == "Player" && (!GameManager.Instance.gameOver)) {
             GameManager.Instance.Hit(type);
-            Deactivate();
+            Hide();
+            gameObject.SetActive(false);
         }
     }
 
@@ -53,14 +62,21 @@ public class GameEntity : MonoBehaviour
             Invoke("Check", delay);
         } else {
             initialized = true;
+            if (type == Type.Chip)
+                relocateTime = GameManager.Instance.ChipRelocateTime();
             GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
         }
     }
 
-    public void Deactivate() {
+    public void Hide() {
         initialized = false;
         triggerSomething = false;
         GetComponent<SpriteRenderer>().color = new Color(1f,1f,1f,0);
-        gameObject.SetActive(false);
+    }
+
+    public void Relocate() {
+        Hide();
+        transform.position = GameManager.Instance.GetSpawnPosition();
+        Invoke("Check", delay);
     }
 }

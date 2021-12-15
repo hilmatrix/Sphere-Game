@@ -25,8 +25,8 @@ public class GameManager : MonoBehaviour {
     public float minChipScale = 0.3f;
     public float maxChipScale = 0.6f;
 
-    public int hitBugScore = 2;
-    public int hitChipScore = -1;
+    public int hitBugScore = 3;
+    public int hitChipScore = -2;
 
     public Transform borderLeft;
     public Transform borderRight;
@@ -35,8 +35,14 @@ public class GameManager : MonoBehaviour {
     public float paddingHorizontal = 0.9f;
     public float paddingVertical = 0.85f;
 
+    public float chipRelocateDelayMin = 20;
+    public float chipRelocateDelayMax = 35;
+
     public float respawnDelay = 5f;
     private float respawnDelayCounter = 0;
+
+    public float gameTime = 121;
+    public bool gameOver = false;
 
     public GameObject bugPrefab;
     public GameObject chipPrefab;
@@ -69,47 +75,59 @@ public class GameManager : MonoBehaviour {
     void Update() {
         float _x = 0;
         float _y = 0;
-
-        if (Input.GetKey(KeyCode.UpArrow)) {
-            _y += 1;
-        }
-        if (Input.GetKey(KeyCode.DownArrow)) {
-            _y -= 1;
-        }
-        if (Input.GetKey(KeyCode.LeftArrow)) {
-            _x -= 1;
-        }
-        if (Input.GetKey(KeyCode.RightArrow)) {
-            _x += 1;
-        }
-        if (Input.GetMouseButton(0)) {
-            Vector2 moveTo = new Vector2();
-            moveTo = (Vector2)(gameCamera.ScreenToWorldPoint(Input.mousePosition) -
-                SphereController.Instance.transform.position);
-            _x = moveTo.normalized.x;
-            _y = moveTo.normalized.y;
-        }
-        SphereController.Instance.Move(_x, _y);
-
         float deltaTime = Time.unscaledDeltaTime;
-        respawnDelayCounter -= deltaTime;
 
-        if (respawnDelayCounter < 0f) {
-            respawnDelayCounter = respawnDelay;
+        if (!gameOver) {
+            if (Input.GetKey(KeyCode.UpArrow)) {
+                _y += 1;
+            }
+            if (Input.GetKey(KeyCode.DownArrow)) {
+                _y -= 1;
+            }
+            if (Input.GetKey(KeyCode.LeftArrow)) {
+                _x -= 1;
+            }
+            if (Input.GetKey(KeyCode.RightArrow)) {
+                _x += 1;
+            }
+            if (Input.GetMouseButton(0)) {
+                Vector2 moveTo = new Vector2();
+                moveTo = (Vector2)(gameCamera.ScreenToWorldPoint(Input.mousePosition) -
+                    SphereController.Instance.transform.position);
+                _x = moveTo.normalized.x;
+                _y = moveTo.normalized.y;
+            }
+            SphereController.Instance.Move(_x, _y);
 
-            if (bugPool.TotalActive() < minBug) {
-                int randomBug = Mathf.RoundToInt(Random.Range(0, maxBug - bugPool.TotalActive()));
-                for (int loop = 0; loop < randomBug; loop++) {
-                    SpawnBug();
+            respawnDelayCounter -= deltaTime;
+
+            if (respawnDelayCounter < 0f) {
+                respawnDelayCounter = respawnDelay;
+
+                if (bugPool.TotalActive() < minBug) {
+                    int randomBug = Mathf.RoundToInt(Random.Range(0, maxBug - bugPool.TotalActive()));
+                    for (int loop = 0; loop < randomBug; loop++) {
+                        SpawnBug();
+                    }
+                }
+
+                if (chipPool.TotalActive() < minChip) {
+                    int randomChip = Mathf.RoundToInt(Random.Range(0, maxChip - chipPool.TotalActive()));
+                    for (int loop = 0; loop < randomChip; loop++) {
+                        SpawnChip();
+                    }
                 }
             }
+        }
 
-            if (chipPool.TotalActive() < minChip) {
-                int randomChip = Mathf.RoundToInt(Random.Range(0, maxChip - chipPool.TotalActive()));
-                for (int loop = 0; loop < randomChip; loop++) {
-                    SpawnChip();
-                }
-            }
+        gameTime -= deltaTime;
+        if (gameTime > 0) {
+            TimerManager.Instance.text = Mathf.RoundToInt(gameTime).ToString();
+        } else if (!gameOver) {
+            gameOver = true;
+            gameTime = 0;
+            TimerManager.Instance.text = gameTime.ToString();
+            TimerManager.Instance.GameOver();
         }
     }
 
@@ -146,5 +164,9 @@ public class GameManager : MonoBehaviour {
             case GameEntity.Type.Chip: score += hitChipScore; break;
         }
         ScoreManager.Instance.text = score.ToString();
-    } 
+    }
+
+    public float ChipRelocateTime() {
+        return Random.Range(chipRelocateDelayMin, chipRelocateDelayMax);
+    }
 }
