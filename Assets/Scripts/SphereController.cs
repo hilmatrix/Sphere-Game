@@ -79,7 +79,8 @@ public class SphereController : MonoBehaviour
 
     void RestartGame() {
         ResetBall();
-        //Invoke("PushSphere", 2);
+        if (GameManager.Instance.problem2 || GameManager.Instance.problem3)
+            Invoke("PushSphere", 2);
     }
 
 }

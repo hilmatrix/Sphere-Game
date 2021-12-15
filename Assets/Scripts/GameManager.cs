@@ -13,6 +13,16 @@ public class GameManager : MonoBehaviour {
         }
     }
 
+    public bool problem1 = false;
+    public bool problem2 = false;
+    public bool problem3 = false;
+    public bool problem4 = false;
+    public bool problem5 = false;
+    public bool problem6 = false;
+    public bool problem7 = false;
+    public bool problem8 = false;
+    public bool problem9 = false;
+
     public Camera gameCamera;
 
     public int minBug = 5;
@@ -57,6 +67,9 @@ public class GameManager : MonoBehaviour {
         bugPool = new Pool<GameEntity>(bugPrefab);
         chipPool = new Pool<GameEntity>(chipPrefab);
 
+        if (problem1 || problem2 || problem3 || problem4 || problem5)
+            return;
+
         int randomBug = Mathf.RoundToInt(Random.Range(minBug, maxBug));
         int randomChip = Mathf.RoundToInt(Random.Range(minChip, maxChip));
 
@@ -68,6 +81,9 @@ public class GameManager : MonoBehaviour {
             SpawnChip();
         }
 
+        if (problem6)
+            return;
+
         ScoreManager.Instance.text = score.ToString(); 
     }
 
@@ -76,6 +92,9 @@ public class GameManager : MonoBehaviour {
         float _x = 0;
         float _y = 0;
         float deltaTime = Time.unscaledDeltaTime;
+
+        if (problem1 || problem2 || problem3)
+            return;
 
         if (!gameOver) {
             if (Input.GetKey(KeyCode.UpArrow)) {
@@ -90,7 +109,7 @@ public class GameManager : MonoBehaviour {
             if (Input.GetKey(KeyCode.RightArrow)) {
                 _x += 1;
             }
-            if (Input.GetMouseButton(0)) {
+            if (Input.GetMouseButton(0) && (!(problem4))) {
                 Vector2 moveTo = new Vector2();
                 moveTo = (Vector2)(gameCamera.ScreenToWorldPoint(Input.mousePosition) -
                     SphereController.Instance.transform.position);
@@ -99,9 +118,12 @@ public class GameManager : MonoBehaviour {
             }
             SphereController.Instance.Move(_x, _y);
 
+            if (problem4 || problem5 || problem6)
+                return;
+
             respawnDelayCounter -= deltaTime;
 
-            if (respawnDelayCounter < 0f) {
+            if ((respawnDelayCounter < 0f) && (!problem7)) {
                 respawnDelayCounter = respawnDelay;
 
                 if (bugPool.TotalActive() < minBug) {
@@ -120,7 +142,11 @@ public class GameManager : MonoBehaviour {
             }
         }
 
+        if (problem7 || problem8)
+            return;
+
         gameTime -= deltaTime;
+
         if (gameTime > 0) {
             TimerManager.Instance.text = Mathf.RoundToInt(gameTime).ToString();
         } else if (!gameOver) {
@@ -163,6 +189,7 @@ public class GameManager : MonoBehaviour {
             case GameEntity.Type.Bug: score += hitBugScore; break;
             case GameEntity.Type.Chip: score += hitChipScore; break;
         }
+
         ScoreManager.Instance.text = score.ToString();
     }
 

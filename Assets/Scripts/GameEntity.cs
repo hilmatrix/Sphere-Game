@@ -13,6 +13,8 @@ public class GameEntity : MonoBehaviour
     public Type type;
     private float delay = 0.2f;
 
+    public static bool enableRelocate = true;
+
     private float relocateTime;
 
     // Start is called before the first frame update
